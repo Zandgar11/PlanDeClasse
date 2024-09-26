@@ -1,3 +1,5 @@
+let wallMode = false; // Indicateur pour le mode de dessin de murs
+
 // Fonction pour afficher la bonne section lorsque l'on clique sur le menu
 function showSection(sectionId) {
     const sections = document.querySelectorAll('section');
@@ -20,6 +22,14 @@ function createGrid() {
         const cell = document.createElement('div');
         cell.classList.add('cell');
         cell.dataset.position = i; // Attribuer un identifiant de position
+
+        // Événements pour le clic sur la cellule
+        cell.addEventListener('click', () => {
+            if (wallMode) {
+                // Placer un mur si le mode est activé
+                placeElement(cell, "Mur");
+            }
+        });
 
         // Événements pour le glisser-déposer
         cell.addEventListener('dragover', (event) => {
@@ -83,34 +93,46 @@ function saveClassroom() {
     classroomGrid.querySelectorAll('.cell').forEach(cell => {
         gridData.push({
             position: cell.dataset.position,
-            type: cell.className.replace('cell ', ''), // Sauvegarder le type (eleve, mur, bureau)
-            text: cell.innerText
+            type: cell.innerText
         });
     });
 
-    localStorage.setItem('classroomPlan', JSON.stringify(gridData));
-    alert('Plan de classe sauvegardé.');
+    localStorage.setItem('classroomData', JSON.stringify(gridData)); // Enregistrer dans le localStorage
+    alert('Plan de classe sauvegardé !');
 }
 
-// Charger le plan de classe au démarrage
+// Charger le plan de classe depuis le localStorage
 function loadClassroom() {
-    const savedClassroom = JSON.parse(localStorage.getItem('classroomPlan'));
-    if (savedClassroom) {
-        savedClassroom.forEach(cellData => {
-            const cell = document.querySelector(`.cell[data-position="${cellData.position}"]`);
-            cell.classList.add(cellData.type);
-            cell.innerText = cellData.text;
+    const gridData = JSON.parse(localStorage.getItem('classroomData'));
+
+    if (gridData) {
+        gridData.forEach(data => {
+            const cell = document.querySelector(`.cell[data-position="${data.position}"]`);
+            if (cell) {
+                cell.innerText = data.type;
+                if (data.type.includes("Bureau")) {
+                    cell.classList.add('bureau');
+                } else if (data.type.includes("Mur")) {
+                    cell.classList.add('mur');
+                } else {
+                    cell.classList.add('eleve');
+                }
+            }
         });
     }
 }
 
-// Réinitialiser la grille
+// Effacer la grille
 function clearGrid() {
-    const rowsInput = document.getElementById('rows');
-    const colsInput = document.getElementById('cols');
-    rowsInput.value = 15; // Réinitialiser à 15 par défaut
-    colsInput.value = 15; // Réinitialiser à 15 par défaut
+    const classroomGrid = document.getElementById('classroom-grid');
+    classroomGrid.innerHTML = ''; // Réinitialiser la grille
     createGrid(); // Recréer la grille
+}
+
+// Activer ou désactiver le mode de dessin des murs
+function toggleWallMode() {
+    wallMode = !wallMode; // Changer l'état du mode
+    document.getElementById('draw-wall').classList.toggle('active', wallMode); // Changer le style du bouton
 }
 
 // Charger le plan de classe lorsque la page se charge
