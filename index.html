@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Outil de Plan de Classe</title>
+</head>
+<body>
+    <header>
+        <h1>Outil de Plan de Classe</h1>
+    </header>
+    <div class="container">
+        <nav class="sidebar">
+            <h3>Liste des Élèves</h3>
+            <div class="student" draggable="true" ondragstart="drag(event)" id="student1">Élève 1</div>
+            <div class="student" draggable="true" ondragstart="drag(event)" id="student2">Élève 2</div>
+            <div class="student" draggable="true" ondragstart="drag(event)" id="student3">Élève 3</div>
+            <div class="student" draggable="true" ondragstart="drag(event)" id="student4">Élève 4</div>
+            <div class="student" draggable="true" ondragstart="drag(event)" id="student5">Élève 5</div>
+            <h3>Éléments du Bureau</h3>
+            <div class="item" draggable="true" ondragstart="drag(event)" id="bureau">Bureau</div>
+            <div class="item" draggable="true" ondragstart="drag(event)" id="mur">Mur</div>
+            <div class="controls">
+                <label for="rows">Lignes:</label>
+                <input type="number" id="rows" value="15" min="1">
+                <label for="cols">Colonnes:</label>
+                <input type="number" id="cols" value="15" min="1">
+                <button onclick="createGrid()">Créer la Grille</button>
+                <button onclick="saveClassroom()">Sauvegarder</button>
+                <button onclick="clearGrid()">Réinitialiser</button>
+            </div>
+        </nav>
+        <main>
+            <section id="classroom">
+                <h2>Grille de Classe</h2>
+                <div id="classroom-grid"></div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
