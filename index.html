@@ -11,7 +11,7 @@
         <h1>Outil de Plan de Classe</h1>
     </header>
     <div class="container">
-        <nav class="sidebar">
+        <nav class="sidebar left-sidebar">
             <h3>Liste des Élèves</h3>
             <div class="student" draggable="true" ondragstart="drag(event)" id="student1">Élève 1</div>
             <div class="student" draggable="true" ondragstart="drag(event)" id="student2">Élève 2</div>
@@ -30,6 +30,8 @@
                 <button onclick="saveClassroom()">Sauvegarder</button>
                 <button onclick="clearGrid()">Réinitialiser</button>
                 <button id="draw-wall" onclick="toggleWallMode()">Dessiner Mur</button>
+                <button onclick="undo()">Annuler</button>
+                <button onclick="redo()">Rétablir</button>
             </div>
         </nav>
         <main>
@@ -38,6 +40,10 @@
                 <div id="classroom-grid"></div>
             </section>
         </main>
+        <nav class="sidebar right-sidebar">
+            <h3>Élèves sur le Plan</h3>
+            <ul id="studentList"></ul>
+        </nav>
     </div>
     <script src="script.js"></script>
 </body>

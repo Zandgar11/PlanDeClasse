@@ -1,18 +1,20 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Courier New', Courier, monospace; /* Utilisation d'une police monospace pour un style rétro */
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #0b0b0b; /* Fond sombre pour un effet futuriste */
+    color: #00ffcc; /* Couleur de texte cyan */
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
 header {
-    background-color: #333;
-    color: white;
-    padding: 10px 0;
+    background-color: #1c1c1c; /* Fond légèrement plus clair pour le header */
+    color: #ffcc00; /* Couleur d'accent jaune */
+    padding: 15px 0;
     text-align: center;
+    text-shadow: 2px 2px 5px rgba(0, 255, 204, 0.5); /* Ombre pour le texte */
 }
 
 .container {
@@ -21,27 +23,52 @@ header {
 }
 
 .sidebar {
-    width: 200px;
-    background-color: #fff;
-    border-right: 1px solid #ddd;
+    width: 220px;
+    background-color: #1c1c1c; /* Même fond que le header */
+    border-right: 2px solid #00ffcc; /* Bordure turquoise */
     padding: 10px;
     display: flex;
     flex-direction: column;
 }
 
 .student, .item {
-    padding: 8px;
+    padding: 10px;
     margin: 5px 0;
-    background-color: lightgray;
+    background-color: #333; /* Couleur de fond sombre pour les éléments */
+    border: 1px solid #00ffcc; /* Bordure turquoise */
+    border-radius: 5px; /* Coins arrondis pour un look futuriste */
     cursor: grab;
+    transition: transform 0.2s; /* Animation lors du survol */
 }
 
 .student:active, .item:active {
     cursor: grabbing;
 }
 
+.student:hover, .item:hover {
+    transform: scale(1.05); /* Zoom lors du survol */
+}
+
 .controls {
     margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+button {
+    padding: 10px;
+    background-color: #00ffcc; /* Couleur de fond turquoise */
+    color: #1c1c1c; /* Texte sombre */
+    border: none;
+    border-radius: 5px; /* Coins arrondis pour un look futuriste */
+    margin: 5px 0;
+    cursor: pointer;
+    font-weight: bold; /* Texte en gras */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Ombre pour le texte */
+}
+
+button:hover {
+    background-color: #ffcc00; /* Couleur d'accent lors du survol */
 }
 
 main {
@@ -59,41 +86,39 @@ section {
     grid-template-rows: repeat(15, 40px);
     grid-gap: 5px;
     margin-top: 20px;
-    border: 1px solid #333;
+    border: 2px solid #00ffcc; /* Bordure turquoise */
+    border-radius: 5px; /* Coins arrondis pour un look futuriste */
 }
 
 .cell {
     width: 40px;
     height: 40px;
-    background-color: #ddd;
+    background-color: #444; /* Couleur de fond pour les cellules */
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    border: 1px solid #333;
+    border: 1px solid #00ffcc; /* Bordure turquoise */
+    transition: background-color 0.3s, transform 0.2s; /* Animation lors du survol */
 }
 
 .cell.eleve {
-    background-color: lightblue;
+    background-color: #00aaff; /* Bleu pour les élèves */
 }
 
 .cell.mur {
-    background-color: gray;
+    background-color: #555; /* Couleur pour les murs */
 }
 
 .cell.bureau {
-    background-color: lightgreen;
+    background-color: #77ff77; /* Vert clair pour les bureaux */
 }
 
-button {
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin: 5px 0;
+.cell.present {
+    background-color: #ff4444; /* Indicateur de présence rouge */
 }
 
-button:hover {
-    background-color: #555;
+.cell:hover {
+    transform: scale(1.1); /* Zoom lors du survol */
+    background-color: rgba(0, 255, 204, 0.5); /* Légère teinte turquoise */
 }

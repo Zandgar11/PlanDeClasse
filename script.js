@@ -1,23 +1,15 @@
 let wallMode = false; // Indicateur pour le mode de dessin de murs
-
-// Fonction pour afficher la bonne section lorsque l'on clique sur le menu
-function showSection(sectionId) {
-    const sections = document.querySelectorAll('section');
-    sections.forEach(section => section.classList.remove('active'));
-
-    const activeSection = document.getElementById(sectionId);
-    if (activeSection) {
-        activeSection.classList.add('active');
-    }
-}
+let students = []; // Liste des élèves
+let classroomGrid = document.getElementById('classroom-grid'); // Référence à la grille
+let highlightedCell = null; // Référence à la cellule mise en surbrillance
 
 // Fonction pour créer la grille
 function createGrid() {
     const gridSizeX = document.getElementById('cols').value; // Colonnes
     const gridSizeY = document.getElementById('rows').value; // Lignes
-    const classroomGrid = document.getElementById('classroom-grid');
     classroomGrid.innerHTML = ''; // Réinitialiser la grille
 
+    // Créer les cellules
     for (let i = 0; i < gridSizeY * gridSizeX; i++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
@@ -26,8 +18,7 @@ function createGrid() {
         // Événements pour le clic sur la cellule
         cell.addEventListener('click', () => {
             if (wallMode) {
-                // Placer un mur si le mode est activé
-                placeElement(cell, "Mur");
+                placeElement(cell, 'mur'); // Placer un mur
             }
         });
 
@@ -41,99 +32,203 @@ function createGrid() {
             placeElement(cell, elementType); // Placer l'élément dans la cellule
         });
 
-        classroomGrid.appendChild(cell);
+        classroomGrid.appendChild(cell); // Ajouter la cellule à la grille
     }
 
-    // Mettre à jour le style de la grille
     classroomGrid.style.gridTemplateColumns = `repeat(${gridSizeX}, 40px)`; // Mise à jour des colonnes
     classroomGrid.style.gridTemplateRows = `repeat(${gridSizeY}, 40px)`; // Mise à jour des lignes
 }
 
 // Placer un élément dans la cellule sélectionnée
 function placeElement(cell, elementType) {
-    // Supprimer toutes les classes existantes
-    cell.classList.remove('eleve', 'mur', 'bureau');
+    cell.classList.remove('eleve', 'mur', 'bureau'); // Supprimer toutes les classes existantes
+    cell.innerText = ''; // Réinitialiser le contenu textuel
 
     // Ajouter la classe correspondant au type d'élément
-    if (elementType === "Bureau") {
-        cell.classList.add('bureau');
-        cell.innerText = 'Bureau'; // Placer le texte du bureau
-    } else if (elementType === "Mur") {
+    if (elementType === 'mur') {
         cell.classList.add('mur');
         cell.innerText = 'Mur'; // Placer le texte du mur
+    } else if (elementType === 'bureau') {
+        cell.classList.add('bureau');
+        cell.innerText = 'Bureau'; // Placer le texte du bureau
     } else {
         cell.classList.add('eleve');
         cell.innerText = elementType; // Placer le nom de l'élève
+        addStudentToSidebar(elementType); // Ajouter à la sidebar des élèves
     }
 }
 
-// Gérer le début du glisser
+// Ajouter un élève à la sidebar
+function addStudentToSidebar(studentName) {
+    if (!students.includes(studentName)) {
+        students.push(studentName); // Ajoute l'élève à la liste
+        const studentList = document.getElementById('studentList');
+        const studentItem = document.createElement('li');
+        studentItem.innerText = studentName;
+        studentItem.dataset.name = studentName; // Ajouter un attribut pour le nom de l'élève
+        studentItem.addEventListener('click', () => {
+            modifyStudentName(studentItem, studentName); // Modifier le nom de l'élève
+        });
+        studentItem.addEventListener('mouseenter', () => highlightCell(studentName)); // Survoler le nom
+        studentItem.addEventListener('mouseleave', () => resetCellHighlight()); // Quitter le survol
+        studentList.appendChild(studentItem); // Ajouter l'élève à la liste des élèves sur le plan
+    }
+}
+
+// Modifier le nom de l'élève
+function modifyStudentName(studentItem, oldName) {
+    const newName = prompt('Modifier le nom de l\'élève:', oldName);
+    if (newName && newName !== oldName) {
+        // Mettre à jour le nom dans la liste
+        studentItem.innerText = newName;
+
+        // Mettre à jour le nom dans la grille
+        const cell = [...classroomGrid.children].find(cell => cell.innerText === oldName);
+        if (cell) {
+            cell.innerText = newName; // Mettre à jour le nom dans la cellule
+
+            // Supprimer les anciens événements de survol (basés sur l'ancien nom)
+            cell.removeEventListener('mouseenter', () => highlightCell(oldName));
+            cell.removeEventListener('mouseleave', resetCellHighlight);
+
+            // Ajouter de nouveaux événements de survol (basés sur le nouveau nom)
+            cell.addEventListener('mouseenter', () => highlightCell(newName));
+            cell.addEventListener('mouseleave', resetCellHighlight);
+        }
+
+        // Mettre à jour le tableau des élèves
+        const index = students.indexOf(oldName);
+        if (index > -1) {
+            students[index] = newName; // Remplacer le nom dans la liste
+        }
+
+        // Mettre à jour également les événements de survol dans la liste des élèves
+        studentItem.removeEventListener('mouseenter', () => highlightCell(oldName));
+        studentItem.removeEventListener('mouseleave', resetCellHighlight);
+
+        // Ajouter les nouveaux événements de survol basés sur le nouveau nom
+        studentItem.addEventListener('mouseenter', () => highlightCell(newName));
+        studentItem.addEventListener('mouseleave', resetCellHighlight);
+    }
+}
+
+// Changer le mode pour dessiner des murs
+function toggleWallMode() {
+    wallMode = !wallMode;
+    document.getElementById('draw-wall').innerText = wallMode ? 'Mode Mur: Activé' : 'Mode Mur: Désactivé';
+}
+
+// Fonction pour réinitialiser la grille
+function clearGrid() {
+    classroomGrid.innerHTML = '';
+    students = []; // Réinitialiser la liste des élèves
+    document.getElementById('studentList').innerHTML = ''; // Réinitialiser la sidebar
+}
+
+// Fonction pour gérer le glisser-déposer
 function drag(event) {
-    event.dataTransfer.setData('text/plain', event.target.innerText); // Enregistrer le nom de l'élément
+    event.dataTransfer.setData('text/plain', event.target.id); // Enregistrer l'identifiant de l'élément
 }
 
-// Fonction pour modifier le nom d'un élève
-function modifyStudentName(element) {
-    const newName = prompt("Entrez le nouveau nom de l'élève :", element.innerText);
-    if (newName) {
-        element.innerText = newName; // Mettre à jour le nom de l'élève
+// Survoler la cellule correspondante
+function highlightCell(studentName) {
+    resetCellHighlight(); // Réinitialiser la surbrillance précédente
+    highlightedCell = [...classroomGrid.children].find(cell => cell.innerText === studentName);
+    if (highlightedCell) {
+        highlightedCell.style.backgroundColor = 'yellow'; // Changer la couleur de la cellule
     }
 }
 
-// Ajouter un événement de clic sur les élèves pour les modifier
-document.querySelectorAll('.student').forEach(student => {
-    student.addEventListener('click', () => modifyStudentName(student)); // Événement pour modifier le nom
-});
+// Réinitialiser la surbrillance de la cellule
+function resetCellHighlight() {
+    if (highlightedCell) {
+        highlightedCell.style.backgroundColor = ''; // Réinitialiser la couleur de la cellule
+        highlightedCell = null; // Réinitialiser la référence
+    }
+}
 
-// Sauvegarder le plan de classe dans le localStorage
+// Ajouter des événements pour les boutons "Annuler" et "Rétablir"
+let history = []; // Historique des états
+let currentState = -1;
+
+function undo() {
+    if (currentState > 0) {
+        currentState--;
+        restoreState(history[currentState]);
+    }
+}
+
+function redo() {
+    if (currentState < history.length - 1) {
+        currentState++;
+        restoreState(history[currentState]);
+    }
+}
+
 function saveClassroom() {
-    const classroomGrid = document.getElementById('classroom-grid');
-    const gridData = [];
-
-    classroomGrid.querySelectorAll('.cell').forEach(cell => {
-        gridData.push({
+    const state = [];
+    Array.from(classroomGrid.children).forEach(cell => {
+        state.push({
             position: cell.dataset.position,
-            type: cell.innerText
+            classList: Array.from(cell.classList),
+            text: cell.innerText
         });
     });
-
-    localStorage.setItem('classroomData', JSON.stringify(gridData)); // Enregistrer dans le localStorage
-    alert('Plan de classe sauvegardé !');
+    history = history.slice(0, currentState + 1);
+    history.push(state);
+    currentState++;
 }
 
-// Charger le plan de classe depuis le localStorage
-function loadClassroom() {
-    const gridData = JSON.parse(localStorage.getItem('classroomData'));
-
-    if (gridData) {
-        gridData.forEach(data => {
-            const cell = document.querySelector(`.cell[data-position="${data.position}"]`);
-            if (cell) {
-                cell.innerText = data.type;
-                if (data.type.includes("Bureau")) {
-                    cell.classList.add('bureau');
-                } else if (data.type.includes("Mur")) {
-                    cell.classList.add('mur');
-                } else {
-                    cell.classList.add('eleve');
-                }
-            }
-        });
-    }
-}
-
-// Effacer la grille
-function clearGrid() {
-    const classroomGrid = document.getElementById('classroom-grid');
+function restoreState(state) {
     classroomGrid.innerHTML = ''; // Réinitialiser la grille
-    createGrid(); // Recréer la grille
+    state.forEach(cellData => {
+        const cell = document.createElement('div');
+        cell.classList.add('cell', ...cellData.classList);
+        cell.innerText = cellData.text;
+        cell.dataset.position = cellData.position;
+        classroomGrid.appendChild(cell);
+    });
 }
 
-// Activer ou désactiver le mode de dessin des murs
-function toggleWallMode() {
-    wallMode = !wallMode; // Changer l'état du mode
-    document.getElementById('draw-wall').classList.toggle('active', wallMode); // Changer le style du bouton
+// Exporter et importer la configuration
+function exportConfiguration() {
+    const state = Array.from(classroomGrid.children).map(cell => ({
+        position: cell.dataset.position,
+        class: Array.from(cell.classList),
+        text: cell.innerText
+    }));
+    const json = JSON.stringify(state);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'configuration.json';
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
-// Charger le plan de classe lorsque la page se charge
-window.onload = loadClassroom;
+function importConfiguration() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = () => {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const state = JSON.parse(event.target.result);
+            clearGrid(); // Réinitialiser la grille avant d'importer
+            state.forEach(cellData => {
+                const cell = document.createElement('div');
+                cell.classList.add('cell', ...cellData.class);
+                cell.innerText = cellData.text;
+                cell.dataset.position = cellData.position;
+                classroomGrid.appendChild(cell);
+            });
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+// Initialiser la grille lors du chargement de la page
+window.onload = createGrid; // Initialisation de la grille
